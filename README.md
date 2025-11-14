@@ -160,8 +160,6 @@ aira/
 │   ├── qemu.nix          # VM image
 │   └── iso.nix           # ISO image
 ├── scripts/               # Helper scripts
-│   ├── build-qemu.sh
-│   ├── run-qemu.sh
 │   └── test-system.sh
 └── tests/                 # Integration tests
     └── integration/
