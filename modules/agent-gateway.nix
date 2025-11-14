@@ -79,6 +79,7 @@ in {
       wants = [ "ollama.service" ];
       
       environment = {
+        HOME = "/var/lib/agent-gateway";
         GATEWAY_CONFIG = configFile;
         GATEWAY_HOST = cfg.host;
         GATEWAY_PORT = toString cfg.port;
@@ -97,7 +98,6 @@ in {
         PrivateTmp = true;
         ProtectSystem = "strict";
         ProtectHome = true;
-        ReadWritePaths = [ cfg.dataDir ];
       };
     };
   };

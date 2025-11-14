@@ -48,6 +48,7 @@ in {
       after = [ "network.target" ];
       
       environment = {
+        HOME = "/var/lib/ollama";
         OLLAMA_HOST = "${cfg.host}:${toString cfg.port}";
         OLLAMA_MODELS = "${cfg.dataDir}/models";
       };
@@ -65,7 +66,6 @@ in {
         PrivateTmp = true;
         ProtectSystem = "strict";
         ProtectHome = true;
-        ReadWritePaths = [ cfg.dataDir ];
       };
     };
     
