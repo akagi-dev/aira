@@ -223,7 +223,7 @@ fix: correct Ollama port configuration
 docs: update README with ARM support info
 refactor: simplify Agent Gateway module
 test: add tests for filesystem MCP server
-chore: update nixpkgs to 25.05
+chore: update nixpkgs to 24.05
 ```
 
 ## Testing

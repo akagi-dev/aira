@@ -2,7 +2,7 @@
   description = "AIRA - AI-powered NixOS system with Ollama and Agent Gateway";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
@@ -16,7 +16,7 @@
         modules = [
           ./configuration.nix
           {
-            system.stateVersion = "25.05";
+            system.stateVersion = "24.11";
             nixpkgs.hostPlatform = "x86_64-linux";
           }
         ];
@@ -37,7 +37,7 @@
             modules = [
               ./images/qemu.nix
               {
-                system.stateVersion = "25.05";
+                system.stateVersion = "24.11";
                 nixpkgs.hostPlatform = "x86_64-linux";
               }
             ];

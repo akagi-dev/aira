@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Complete MVP Refactoring
 
 #### Added
-- Modern NixOS 25.05 flake-based configuration
+- Modern NixOS 24.11 flake-based configuration
 - Ollama LLM service with llama3.2:3b model
 - Agent Gateway for MCP protocol routing
 - Open WebUI web interface on port 8080
