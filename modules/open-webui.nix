@@ -55,6 +55,7 @@ in {
       wants = [ "ollama.service" ];
       
       environment = {
+        HOME = "/var/lib/open-webui";
         OLLAMA_BASE_URL = cfg.ollamaUrl;
         WEBUI_HOST = cfg.host;
         WEBUI_PORT = toString cfg.port;
@@ -74,7 +75,6 @@ in {
         PrivateTmp = true;
         ProtectSystem = "strict";
         ProtectHome = true;
-        ReadWritePaths = [ cfg.dataDir ];
       };
     };
   };
