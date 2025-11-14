@@ -63,7 +63,7 @@
   # Enable SSH for remote installation
   services.openssh = {
     enable = true;
-    settings.PermitRootLogin = "yes";
+    settings.PermitRootLogin = lib.mkForce "yes";
   };
 
   # Set root password for live system
