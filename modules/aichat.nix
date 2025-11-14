@@ -7,10 +7,11 @@ let
   
   # aichat configuration file
   aichatConfig = pkgs.writeText "aichat-config.yaml" ''
-    model: ${cfg.defaultModel}
+    model: ollama:${cfg.defaultModel}
     
     clients:
-      - type: ollama
+      - type: openai-compatible
+        name: ollama
         api_base: ${cfg.ollamaUrl}
         models:
           - name: ${cfg.defaultModel}
@@ -44,7 +45,7 @@ in {
     
     ollamaUrl = mkOption {
       type = types.str;
-      default = "http://127.0.0.1:11434";
+      default = "http://127.0.0.1:11434/v1";
       description = "URL to Ollama API";
     };
     
