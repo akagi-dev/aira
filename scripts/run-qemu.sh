@@ -25,7 +25,13 @@ echo "   ssh aira@localhost -p 2222"
 echo "   Password: aira"
 echo ""
 
-# Run the VM
-# The Nix-generated script already includes all necessary QEMU options
-# from the configuration in images/qemu.nix
-exec "$(readlink -f result)/bin/run-nixos-vm"
+# The Nix-generated run-nixos-vm script includes all VM configuration
+# from images/qemu.nix (memory, cores, port forwarding, etc.)
+# 
+# Optional: Set GRAPHICS=false environment variable for headless mode
+# Example: GRAPHICS=false ./scripts/run-qemu.sh
+if [ "${GRAPHICS:-}" = "false" ]; then
+    exec "$(readlink -f result)/bin/run-nixos-vm" -nographic
+else
+    exec "$(readlink -f result)/bin/run-nixos-vm"
+fi
