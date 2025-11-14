@@ -18,9 +18,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          
+
       - name: Get version
         id: get_version
         run: |
@@ -109,7 +107,7 @@ jobs:
       - name: Install Nix
         uses: cachix/install-nix-action@v25
         with:
-          nix_path: nixpkgs=channel:nixos-24.05
+          nix_path: nixpkgs=channel:nixos-25.05
           extra_nix_config: |
             experimental-features = nix-command flakes
             
@@ -117,8 +115,8 @@ jobs:
         uses: cachix/cachix-action@v14
         with:
           name: aira
-          authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
-          signingKey: "${{ secrets.CACHIX_SIGNING_KEY }}"
+          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
+          signingKey: ${{ secrets.CACHIX_SIGNING_KEY }}
           
       - name: Build ${{ matrix.target }}
         run: |

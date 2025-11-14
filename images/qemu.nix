@@ -18,7 +18,7 @@
     # Port forwarding
     forwardPorts = [
       { from = "host"; host.port = 2222; guest.port = 22; }    # SSH
-      { from = "host"; host.port = 8080; guest.port = 8080; }  # Open WebUI
+      { from = "host"; host.port = 8081; guest.port = 8080; }  # Open WebUI
       { from = "host"; host.port = 11434; guest.port = 11434; } # Ollama
     ];
     

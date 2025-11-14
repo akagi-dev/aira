@@ -45,7 +45,7 @@ run:
 	@echo "   ssh aira@localhost -p 2222"
 	@echo "   Password: aira"
 	@echo ""
-	@exec $$(readlink -f result)/bin/run-nixos-vm
+	@exec $$(readlink -f result)/bin/run-aira-vm
 
 # Run in headless mode
 run-headless:
@@ -64,7 +64,7 @@ run-headless:
 	@echo "   ssh aira@localhost -p 2222"
 	@echo "   Password: aira"
 	@echo ""
-	@exec $$(readlink -f result)/bin/run-nixos-vm -nographic
+	@exec $$(readlink -f result)/bin/run-aira-vm -nographic
 
 # Run tests
 test:

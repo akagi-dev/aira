@@ -25,10 +25,8 @@
   
   # Networking
   networking.hostName = "aira";
-  networking.useDHCP = false;
-  networking.interfaces.ens3.useDHCP = true;
-  networking.firewall.enable = true;
-  networking.firewall.allowedTCPPorts = [ 22 8080 11434 ];
+  networking.useDHCP = true;
+  networking.firewall.enable = false;
 
   # Enable SSH
   services.openssh = {
@@ -86,5 +84,5 @@
     };
   };
 
-  system.stateVersion = "24.05";
+  system.stateVersion = "25.05";
 }

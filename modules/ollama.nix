@@ -75,10 +75,16 @@ in {
       after = [ "ollama.service" ];
       wants = [ "ollama.service" ];
       wantedBy = [ "multi-user.target" ];
+
+      environment = {
+        HOME = "/var/lib/ollama";
+      };
       
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;
+        StateDirectory = "ollama";
+        DynamicUser = true;
         ExecStart = pkgs.writeShellScript "ollama-pull-model" ''
           set -e
           # Wait for Ollama to be ready
@@ -94,6 +100,12 @@ in {
             ${cfg.package}/bin/ollama pull ${cfg.model}
           fi
         '';
+
+        # Security hardening
+        NoNewPrivileges = true;
+        PrivateTmp = true;
+        ProtectSystem = "strict";
+        ProtectHome = true;
       };
     };
   };
