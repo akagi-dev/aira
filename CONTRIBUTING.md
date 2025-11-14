@@ -298,6 +298,16 @@ All changes are automatically tested via GitHub Actions:
 
 Ensure your changes pass CI before requesting review.
 
+### GitHub Secrets
+
+The CI/CD pipeline requires the following secrets to be configured in the repository settings:
+
+- **CACHIX_AUTH_TOKEN**: Authentication token for Cachix binary cache
+  - Used to cache Nix build artifacts and speed up CI builds
+  - Obtain from [cachix.org](https://cachix.org) after creating an account
+  - Add to repository secrets at: Settings → Secrets and variables → Actions → New repository secret
+  - The cache name is `aira` (configured in `.github/workflows/build.yml`)
+
 ## Security
 
 ### Security Considerations
