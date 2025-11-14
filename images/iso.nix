@@ -5,6 +5,16 @@
     ../configuration.nix
   ];
 
+  # Override boot configuration for ISO
+  boot.loader.grub.enable = lib.mkForce false;
+  boot.loader.grub.device = lib.mkForce "nodev";
+
+  # ISO doesn't need persistent root FS
+  fileSystems."/" = lib.mkForce {
+    device = "tmpfs";
+    fsType = "tmpfs";
+  };
+
   # ISO specific configuration
   isoImage = {
     makeEfiBootable = true;
