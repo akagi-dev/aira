@@ -64,7 +64,7 @@ in {
       
       serviceConfig = {
         Type = "simple";
-        ExecStart = "${cfg.package}/bin/open-webui";
+        ExecStart = "${cfg.package}/bin/open-webui serve";
         Restart = "always";
         RestartSec = 3;
         StateDirectory = "open-webui";
