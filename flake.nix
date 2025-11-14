@@ -32,7 +32,16 @@
           pkgs = import nixpkgs { system = "x86_64-linux"; };
         in {
           # QEMU VM image
-          qemu-vm = nixosSystem.config.system.build.vm;
+          qemu-vm = (nixpkgs.lib.nixosSystem {
+            system = "x86_64-linux";
+            modules = [
+              ./images/qemu.nix
+              {
+                system.stateVersion = "24.05";
+                nixpkgs.hostPlatform = "x86_64-linux";
+              }
+            ];
+          }).config.system.build.vm;
           
           # ISO image
           iso = (nixpkgs.lib.nixosSystem {
