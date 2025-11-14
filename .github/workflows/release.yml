@@ -1,0 +1,151 @@
+name: Release AIRA
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+      version: ${{ steps.get_version.outputs.version }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Get version
+        id: get_version
+        run: |
+          if [ "${{ github.event_name }}" == "push" ]; then
+            VERSION=${GITHUB_REF#refs/tags/}
+          else
+            VERSION="dev-$(git rev-parse --short HEAD)"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+          
+      - name: Generate changelog
+        id: changelog
+        run: |
+          if [ "${{ github.event_name }}" == "push" ]; then
+            # Get commits since last tag
+            PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+            if [ -n "$PREV_TAG" ]; then
+              CHANGELOG=$(git log --pretty=format:"- %s" $PREV_TAG..HEAD)
+            else
+              CHANGELOG=$(git log --pretty=format:"- %s" HEAD)
+            fi
+          else
+            CHANGELOG="Development build"
+          fi
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.get_version.outputs.version }}
+          release_name: AIRA ${{ steps.get_version.outputs.version }}
+          body: |
+            ## AIRA Release ${{ steps.get_version.outputs.version }}
+            
+            AI-powered NixOS system with Ollama and Agent Gateway
+            
+            ### Changes
+            ${{ steps.changelog.outputs.changelog }}
+            
+            ### Components
+            - NixOS 24.05
+            - Ollama (llama3.2:3b)
+            - Agent Gateway
+            - Open WebUI
+            - aichat TUI
+            - MCP Servers (filesystem, nix, systemd, shell)
+            
+            ### Downloads
+            - QEMU VM image: For development and testing
+            - ISO image: For bare-metal installation
+            
+            ### Quick Start
+            ```bash
+            # Download and run QEMU VM
+            wget <QEMU-URL>
+            qemu-system-x86_64 -m 4G -smp 4 -enable-kvm -hda aira.qcow2 \
+              -netdev user,id=net0,hostfwd=tcp::2222-:22,hostfwd=tcp::8080-:8080 \
+              -device virtio-net-pci,netdev=net0
+            
+            # Access:
+            # - SSH: ssh aira@localhost -p 2222 (password: aira)
+            # - Web UI: http://localhost:8080
+            ```
+          draft: false
+          prerelease: ${{ github.event_name == 'workflow_dispatch' }}
+
+  build-and-upload:
+    name: Build and Upload Release Assets
+    needs: create-release
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        target: [qemu-vm, iso]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Install Nix
+        uses: cachix/install-nix-action@v25
+        with:
+          nix_path: nixpkgs=channel:nixos-24.05
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            
+      - name: Setup Cachix
+        uses: cachix/cachix-action@v14
+        with:
+          name: aira
+          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+          
+      - name: Build ${{ matrix.target }}
+        run: |
+          nix build .#${{ matrix.target }} --impure --show-trace --print-build-logs
+          
+      - name: Prepare artifact
+        id: prepare
+        run: |
+          VERSION="${{ needs.create-release.outputs.version }}"
+          if [ "${{ matrix.target }}" == "qemu-vm" ]; then
+            ARTIFACT_NAME="aira-${VERSION}-x86_64.qcow2"
+            # In real scenario, extract qcow2 from result
+            echo "artifact_name=$ARTIFACT_NAME" >> $GITHUB_OUTPUT
+            echo "artifact_path=result/" >> $GITHUB_OUTPUT
+            echo "content_type=application/octet-stream" >> $GITHUB_OUTPUT
+          else
+            ARTIFACT_NAME="aira-${VERSION}-x86_64.iso"
+            echo "artifact_name=$ARTIFACT_NAME" >> $GITHUB_OUTPUT
+            echo "artifact_path=result/iso/*.iso" >> $GITHUB_OUTPUT
+            echo "content_type=application/x-iso9660-image" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: ${{ steps.prepare.outputs.artifact_path }}
+          asset_name: ${{ steps.prepare.outputs.artifact_name }}
+          asset_content_type: ${{ steps.prepare.outputs.content_type }}

@@ -1,0 +1,34 @@
+# Nix build results
+result
+result-*
+
+# QEMU images
+*.qcow2
+*.qcow2.tmp
+*.img
+
+# ISO images
+*.iso
+
+# direnv
+.direnv/
+.envrc.local
+
+# Development artifacts
+*.log
+*.tmp
+
+# Build artifacts
+dist/
+build/
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
