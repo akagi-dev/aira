@@ -13,8 +13,15 @@
   ];
 
   # Boot configuration
-  boot.loader.grub.enable = true;
-  boot.loader.grub.device = "/dev/vda";
+  boot.loader.grub.enable = lib.mkDefault true;
+  boot.loader.grub.device = lib.mkDefault "/dev/vda";
+
+  # Filesystem configuration (required by NixOS)
+  fileSystems."/" = {
+    device = "/dev/vda1";
+    fsType = "ext4";
+    autoResize = true;
+  };
   
   # Networking
   networking.hostName = "aira";
@@ -27,8 +34,8 @@
   services.openssh = {
     enable = true;
     settings = {
-      PermitRootLogin = "no";
-      PasswordAuthentication = true;
+      PermitRootLogin = lib.mkDefault "no";
+      PasswordAuthentication = lib.mkDefault true;
     };
   };
 

@@ -5,6 +5,16 @@
     ../configuration.nix
   ];
 
+  # Override boot configuration for ISO
+  boot.loader.grub.enable = lib.mkForce false;
+  boot.loader.grub.device = lib.mkForce "nodev";
+
+  # ISO doesn't need persistent root FS
+  fileSystems."/" = lib.mkForce {
+    device = "tmpfs";
+    fsType = "tmpfs";
+  };
+
   # ISO specific configuration
   isoImage = {
     makeEfiBootable = true;
@@ -53,7 +63,7 @@
   # Enable SSH for remote installation
   services.openssh = {
     enable = true;
-    settings.PermitRootLogin = "yes";
+    settings.PermitRootLogin = lib.mkForce "yes";
   };
 
   # Set root password for live system
