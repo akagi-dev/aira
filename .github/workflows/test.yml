@@ -1,0 +1,77 @@
+name: Test AIRA System
+
+on:
+  workflow_run:
+    workflows: ["Build AIRA Images"]
+    types:
+      - completed
+  workflow_dispatch:
+
+jobs:
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Install Nix
+        uses: cachix/install-nix-action@v25
+        with:
+          nix_path: nixpkgs=channel:nixos-24.05
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            
+      - name: Setup Cachix
+        uses: cachix/cachix-action@v14
+        with:
+          name: aira
+          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+          
+      - name: Install test dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-system-x86 qemu-kvm
+          
+      - name: Run integration tests
+        run: |
+          # For now, just verify the test scripts exist and are valid
+          bash -n tests/integration/test_ollama.sh
+          bash -n tests/integration/test_agent_gateway.sh
+          bash -n tests/integration/test_mcp_servers.sh
+          echo "✅ Test scripts are syntactically valid"
+          
+      - name: Verify flake outputs
+        run: |
+          nix flake show
+          
+      - name: Check configuration validity
+        run: |
+          # Verify NixOS configuration is valid
+          nix eval .#nixosConfigurations.aira.config.system.stateVersion --impure
+          
+  lint-nix:
+    name: Lint Nix Files
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Install Nix
+        uses: cachix/install-nix-action@v25
+        with:
+          nix_path: nixpkgs=channel:nixos-24.05
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            
+      - name: Check Nix files
+        run: |
+          # Find all .nix files and check syntax
+          find . -name "*.nix" -type f | while read -r file; do
+            echo "Checking $file..."
+            nix-instantiate --parse "$file" > /dev/null
+          done
+          echo "✅ All Nix files are syntactically valid"

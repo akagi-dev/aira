@@ -1,0 +1,116 @@
+name: Build AIRA Images
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  build-qemu:
+    name: Build QEMU VM Image
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Install Nix
+        uses: cachix/install-nix-action@v25
+        with:
+          nix_path: nixpkgs=channel:nixos-24.05
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            
+      - name: Setup Cachix
+        uses: cachix/cachix-action@v14
+        with:
+          name: aira
+          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+          
+      - name: Build QEMU VM
+        run: |
+          nix build .#qemu-vm --impure --show-trace --print-build-logs
+          
+      - name: Check build output
+        run: |
+          if [ -L result ]; then
+            echo "✅ QEMU VM built successfully"
+            ls -lh result/
+          else
+            echo "❌ Build failed"
+            exit 1
+          fi
+          
+      - name: Upload VM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: aira-qemu-vm
+          path: result/
+          retention-days: 7
+
+  build-iso:
+    name: Build ISO Image
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Install Nix
+        uses: cachix/install-nix-action@v25
+        with:
+          nix_path: nixpkgs=channel:nixos-24.05
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            
+      - name: Setup Cachix
+        uses: cachix/cachix-action@v14
+        with:
+          name: aira
+          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+          
+      - name: Build ISO
+        run: |
+          nix build .#iso --impure --show-trace --print-build-logs
+          
+      - name: Check ISO output
+        run: |
+          if [ -L result ]; then
+            echo "✅ ISO built successfully"
+            ls -lh result/iso/*.iso
+          else
+            echo "❌ Build failed"
+            exit 1
+          fi
+          
+      - name: Upload ISO artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: aira-iso
+          path: result/iso/*.iso
+          retention-days: 7
+
+  check-flake:
+    name: Check Flake
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Install Nix
+        uses: cachix/install-nix-action@v25
+        with:
+          nix_path: nixpkgs=channel:nixos-24.05
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            
+      - name: Check flake
+        run: |
+          nix flake check --impure --show-trace
+          
+      - name: Show flake info
+        run: |
+          nix flake show
