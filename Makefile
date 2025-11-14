@@ -8,8 +8,19 @@ all: help
 
 # Build QEMU VM image
 vm:
-	@echo "🤖 Building QEMU VM image..."
-	@./scripts/build-qemu.sh
+	@echo "🤖 Building AIRA QEMU VM image..."
+	@echo "   This may take several minutes..."
+	@nix build .#qemu-vm --impure --show-trace
+	@if [ -L result ]; then \
+		echo "✅ Build successful!"; \
+		echo "   VM image: $$(readlink -f result)"; \
+		echo ""; \
+		echo "To run the VM:"; \
+		echo "   make run"; \
+	else \
+		echo "❌ Build failed!"; \
+		exit 1; \
+	fi
 
 # Build ISO image
 iso:
@@ -19,13 +30,41 @@ iso:
 
 # Run QEMU VM
 run:
-	@echo "🚀 Starting AIRA VM..."
-	@./scripts/run-qemu.sh
+	@if [ ! -L result ]; then \
+		echo "❌ VM not built yet. Run 'make vm' first."; \
+		exit 1; \
+	fi
+	@echo "🤖 Starting AIRA VM..."
+	@echo ""
+	@echo "Port forwarding:"
+	@echo "   SSH:        localhost:2222 → VM:22"
+	@echo "   Open WebUI: localhost:8080 → VM:8080"
+	@echo "   Ollama API: localhost:11434 → VM:11434"
+	@echo ""
+	@echo "To connect via SSH:"
+	@echo "   ssh aira@localhost -p 2222"
+	@echo "   Password: aira"
+	@echo ""
+	@exec $$(readlink -f result)/bin/run-nixos-vm
 
 # Run in headless mode
 run-headless:
-	@echo "🚀 Starting AIRA VM (headless)..."
-	@GRAPHICS=false ./scripts/run-qemu.sh
+	@if [ ! -L result ]; then \
+		echo "❌ VM not built yet. Run 'make vm' first."; \
+		exit 1; \
+	fi
+	@echo "🤖 Starting AIRA VM (headless)..."
+	@echo ""
+	@echo "Port forwarding:"
+	@echo "   SSH:        localhost:2222 → VM:22"
+	@echo "   Open WebUI: localhost:8080 → VM:8080"
+	@echo "   Ollama API: localhost:11434 → VM:11434"
+	@echo ""
+	@echo "To connect via SSH:"
+	@echo "   ssh aira@localhost -p 2222"
+	@echo "   Password: aira"
+	@echo ""
+	@exec $$(readlink -f result)/bin/run-nixos-vm -nographic
 
 # Run tests
 test:

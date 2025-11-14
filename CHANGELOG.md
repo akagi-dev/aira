@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Consolidated `build-qemu.sh` and `run-qemu.sh` into Makefile targets for simpler project structure
+
 ### Complete MVP Refactoring
 
 #### Added
@@ -21,7 +24,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - MCP Shell Server with command sandboxing
 - QEMU VM image builder with 4GB RAM, 4 cores, 20GB disk
 - ISO installer image with pre-configured system
-- Build scripts: `build-qemu.sh`, `run-qemu.sh`
 - Integration tests for all services
 - GitHub Actions CI/CD pipeline (build, test, release)
 - Comprehensive README.md with architecture documentation
